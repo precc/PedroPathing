@@ -237,6 +237,9 @@ public class Follower {
         poseUpdater = new PoseUpdater(hardwareMap, localizer);
         driveVectorScaler = new DriveVectorScaler(FollowerConstants.frontLeftVector);
 
+        voltageSensor = hardwareMap.voltageSensor.iterator().next();
+        voltageTimer.reset();
+
         leftFront = hardwareMap.get(DcMotorEx.class, leftFrontMotorName);
         leftRear = hardwareMap.get(DcMotorEx.class, leftRearMotorName);
         rightRear = hardwareMap.get(DcMotorEx.class, rightRearMotorName);
