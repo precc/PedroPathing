@@ -534,6 +534,7 @@ public class Follower {
         currentPathChain = pathChain;
         currentPath = pathChain.getPath(chainIndex);
         closestPose = currentPath.getClosestPoint(poseUpdater.getPose(), BEZIER_CURVE_SEARCH_LIMIT);
+        currentPathChain.resetCallbacks();
     }
 
     /**
