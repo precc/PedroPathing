@@ -261,6 +261,11 @@ public class PinpointLocalizer extends Localizer {
 
         Pose estimate = new Pose(pinpointEstimate.getX(DistanceUnit.INCH), pinpointEstimate.getY(DistanceUnit.INCH), pinpointEstimate.getHeading(AngleUnit.RADIANS));
 
+        if (estimate.roughlyEquals(new Pose(), 0.002)) {
+            pinpointCooked = true;
+            return MathFunctions.addPoses(currentPose, new Pose(currentVelocity.getX() * deltaTime / Math.pow(10, 9), currentVelocity.getY() * deltaTime / Math.pow(10, 9), currentVelocity.getHeading() * deltaTime / Math.pow(10, 9)));
+        }
+
         pinpointCooked = false;
         return estimate;
     }
