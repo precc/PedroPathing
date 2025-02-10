@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import static com.pedropathing.localization.constants.ThreeWheelIMUConstants.*;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import com.pedropathing.localization.Encoder;
 import com.pedropathing.localization.Localizer;
 import com.pedropathing.localization.Matrix;
@@ -322,5 +324,14 @@ public class ThreeWheelIMULocalizer extends Localizer {
     @Override
     public IMU getIMU() {
         return imu;
+    }
+
+    /**
+     * This returns whether if any component of robot's position is NaN.
+     *
+     * @return returns whether the robot's position is NaN
+     */
+    public boolean isNAN() {
+        return Double.isNaN(getPose().getX()) || Double.isNaN(getPose().getY()) || Double.isNaN(getPose().getHeading());
     }
 }

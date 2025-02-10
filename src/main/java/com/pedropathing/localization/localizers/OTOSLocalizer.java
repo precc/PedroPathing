@@ -219,4 +219,13 @@ public class OTOSLocalizer extends Localizer {
      */
     public void resetIMU() {
     }
+
+    /**
+     * This returns whether if any component of robot's position is NaN.
+     *
+     * @return returns whether the robot's position is NaN
+     */
+    public boolean isNAN() {
+        return Double.isNaN(getPose().getX()) || Double.isNaN(getPose().getY()) || Double.isNaN(getPose().getHeading());
+    }
 }

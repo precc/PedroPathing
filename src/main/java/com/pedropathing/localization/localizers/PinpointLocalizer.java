@@ -265,8 +265,12 @@ public class PinpointLocalizer extends Localizer {
         return estimate;
     }
 
-    @Override
-    public boolean isPinpointCooked() {
+    /**
+     * This returns whether if any component of robot's position is NaN.
+     *
+     * @return returns whether the robot's position is NaN
+     */
+    public boolean isNAN() {
         return pinpointCooked;
     }
 }

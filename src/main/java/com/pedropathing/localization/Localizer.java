@@ -103,7 +103,10 @@ public abstract class Localizer {
         return null;
     }
 
-    public boolean isPinpointCooked() {return false;}
-
-    public void setPinpointIsCooked(boolean cooked) {}
+    /**
+     * This returns whether if any component of robot's position is NaN.
+     *
+     * @return returns if any component of the robot's position is NaN
+     */
+    public abstract boolean isNAN();
 }

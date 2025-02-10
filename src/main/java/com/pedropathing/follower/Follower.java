@@ -134,6 +134,8 @@ public class Follower {
     public Vector centripetalVector;
     public Vector correctiveVector;
 
+    private double centripetalScaling = FollowerConstants.centripetalScaling;
+
     private PIDFController secondaryTranslationalPIDF = new PIDFController(FollowerConstants.secondaryTranslationalPIDFCoefficients);
     private PIDFController secondaryTranslationalIntegral = new PIDFController(FollowerConstants.secondaryTranslationalIntegral);
     private PIDFController translationalPIDF = new PIDFController(FollowerConstants.translationalPIDFCoefficients);
@@ -262,6 +264,10 @@ public class Follower {
         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
 
         breakFollowing();
+    }
+
+    public void setCentripetalScaling(double set) {
+        centripetalScaling = set;
     }
 
     /**
@@ -1059,7 +1065,7 @@ public class Follower {
             curvature = (yDoublePrime) / (Math.pow(Math.sqrt(1 + Math.pow(yPrime, 2)), 3));
         }
         if (Double.isNaN(curvature)) return new Vector();
-        centripetalVector = new Vector(MathFunctions.clamp(FollowerConstants.centripetalScaling * FollowerConstants.mass * Math.pow(MathFunctions.dotProduct(poseUpdater.getVelocity(), MathFunctions.normalizeVector(currentPath.getClosestPointTangentVector())), 2) * curvature, -driveVectorScaler.getMaxPowerScaling(), driveVectorScaler.getMaxPowerScaling()), currentPath.getClosestPointTangentVector().getTheta() + Math.PI / 2 * MathFunctions.getSign(currentPath.getClosestPointNormalVector().getTheta()));
+        centripetalVector = new Vector(MathFunctions.clamp(centripetalScaling * FollowerConstants.mass * Math.pow(MathFunctions.dotProduct(poseUpdater.getVelocity(), MathFunctions.normalizeVector(currentPath.getClosestPointTangentVector())), 2) * curvature, -driveVectorScaler.getMaxPowerScaling(), driveVectorScaler.getMaxPowerScaling()), currentPath.getClosestPointTangentVector().getTheta() + Math.PI / 2 * MathFunctions.getSign(currentPath.getClosestPointNormalVector().getTheta()));
         return centripetalVector;
     }
 
@@ -1230,8 +1236,8 @@ public class Follower {
         }
     }
 
-    public boolean isPinpointCooked() {
-        return poseUpdater.getLocalizer().isPinpointCooked();
+    public boolean isLocalizationNAN() {
+        return poseUpdater.getLocalizer().isNAN();
     }
 
     /**
