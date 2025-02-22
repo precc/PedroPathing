@@ -321,13 +321,11 @@ public class MathFunctions {
         return roughlyEquals(one, two, 0.0001);
     }
 
-    public Pose globalCoordinates(Pose currentPose) {
-        Pose normalized = new Pose(currentPose.getX()-72, currentPose.getY()-72, currentPose.getHeading());
-        return rotatePose(normalized, -Math.PI/2, true);
+    public static double inToMM(double in) {
+        return in * 25.4;
     }
 
-    public Pose pedroCoordinates(Pose currentPose) {
-        Pose rotatedPose = rotatePose(currentPose, Math.PI/2, true);
-        return new Pose(rotatedPose.getX() + 72, rotatedPose.getY() + 72, rotatedPose.getHeading());
+    public static double mmToIn(double mm) {
+        return mm / 25.4;
     }
 }

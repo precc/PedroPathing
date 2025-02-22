@@ -29,6 +29,7 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import com.pedropathing.pathgen.MathFunctions;
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
@@ -39,7 +40,6 @@ import com.qualcomm.robotcore.util.TypeConversion;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -375,7 +375,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * in field coordinates. <br><br>
      * This overrides the current position. <br><br>
      * <strong>Using this feature to track your robot's position in field coordinates:</strong> <br>
-     * When you start your code, send a Pose2D that describes the starting position on the field of your robot. <br>
+     * When you start your code, send a Pose that describes the starting position on the field of your robot. <br>
      * Say you're on the red alliance, your robot is against the wall and closer to the audience side,
      * and the front of your robot is pointing towards the center of the field.
      * You can send a setPosition with something like -600mm x, -1200mm Y, and 90 degrees. The pinpoint would then always
@@ -389,12 +389,12 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * to determine your location. Then when you pull a new position from your secondary sensor,
      * send a setPosition command with the new position. The Pinpoint will then track your movement
      * relative to that new, more accurate position.
-     * @param pos a Pose2D describing the robot's new position.
+     * @param pos a Pose describing the robot's new position.
      */
-    public Pose2D setPosition(Pose2D pos){
-        writeByteArray(Register.X_POSITION,(floatToByteArray((float) pos.getX(DistanceUnit.MM), ByteOrder.LITTLE_ENDIAN)));
-        writeByteArray(Register.Y_POSITION,(floatToByteArray((float) pos.getY(DistanceUnit.MM),ByteOrder.LITTLE_ENDIAN)));
-        writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(AngleUnit.RADIANS),ByteOrder.LITTLE_ENDIAN)));
+    public Pose setPosition(Pose pos){
+        writeByteArray(Register.X_POSITION,(floatToByteArray((float) MathFunctions.inToMM(pos.getX()), ByteOrder.LITTLE_ENDIAN)));
+        writeByteArray(Register.Y_POSITION,(floatToByteArray((float) MathFunctions.inToMM(pos.getY()),ByteOrder.LITTLE_ENDIAN)));
+        writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(),ByteOrder.LITTLE_ENDIAN)));
         return pos;
     }
 
