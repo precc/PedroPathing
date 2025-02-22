@@ -74,9 +74,10 @@ public class MathFunctions {
      * @return returns the normalized angle.
      */
     public static double normalizeAngle(double angleRadians) {
-        double angle = angleRadians;
-        while (angle < 0) angle += 2 * Math.PI;
-        while (angle > 2 * Math.PI) angle -= 2 * Math.PI;
+        double angle = angleRadians % (2*Math.PI);
+        if (angle < 0) {
+            return angle + 2*Math.PI;
+        }
         return angle;
     }
 

@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.util.Constants;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -91,8 +92,8 @@ public class Follower {
 
     private PathChain currentPathChain;
 
-    private final int BEZIER_CURVE_SEARCH_LIMIT = FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT;
-    private final int AVERAGED_VELOCITY_SAMPLE_NUMBER = FollowerConstants.AVERAGED_VELOCITY_SAMPLE_NUMBER;
+    private int BEZIER_CURVE_SEARCH_LIMIT;
+    private int AVERAGED_VELOCITY_SAMPLE_NUMBER;
 
     private int chainIndex;
 
@@ -108,8 +109,8 @@ public class Follower {
     private double globalMaxPower = 1;
     private double previousSecondaryTranslationalIntegral;
     private double previousTranslationalIntegral;
-    private double holdPointTranslationalScaling = FollowerConstants.holdPointTranslationalScaling;
-    private double holdPointHeadingScaling = FollowerConstants.holdPointHeadingScaling;
+    private double holdPointTranslationalScaling;
+    private double holdPointHeadingScaling;
     public double driveError;
     public double headingError;
 
@@ -134,18 +135,18 @@ public class Follower {
     public Vector centripetalVector;
     public Vector correctiveVector;
 
-    private double centripetalScaling = FollowerConstants.centripetalScaling;
+    private double centripetalScaling;
 
-    private PIDFController secondaryTranslationalPIDF = new PIDFController(FollowerConstants.secondaryTranslationalPIDFCoefficients);
-    private PIDFController secondaryTranslationalIntegral = new PIDFController(FollowerConstants.secondaryTranslationalIntegral);
-    private PIDFController translationalPIDF = new PIDFController(FollowerConstants.translationalPIDFCoefficients);
-    private PIDFController translationalIntegral = new PIDFController(FollowerConstants.translationalIntegral);
-    private PIDFController secondaryHeadingPIDF = new PIDFController(FollowerConstants.secondaryHeadingPIDFCoefficients);
-    private PIDFController headingPIDF = new PIDFController(FollowerConstants.headingPIDFCoefficients);
-    private FilteredPIDFController secondaryDrivePIDF = new FilteredPIDFController(FollowerConstants.secondaryDrivePIDFCoefficients);
-    private FilteredPIDFController drivePIDF = new FilteredPIDFController(FollowerConstants.drivePIDFCoefficients);
+    private PIDFController secondaryTranslationalPIDF;
+    private PIDFController secondaryTranslationalIntegral;
+    private PIDFController translationalPIDF;
+    private PIDFController translationalIntegral;
+    private PIDFController secondaryHeadingPIDF;
+    private PIDFController headingPIDF;
+    private FilteredPIDFController secondaryDrivePIDF;
+    private FilteredPIDFController drivePIDF;
 
-    private KalmanFilter driveKalmanFilter = new KalmanFilter(FollowerConstants.driveKalmanFilterParameters);
+    private KalmanFilter driveKalmanFilter;
     private double[] driveErrors;
     private double rawDriveError;
     private double previousRawDriveError;
@@ -175,8 +176,9 @@ public class Follower {
      * This creates a new Follower given a HardwareMap.
      * @param hardwareMap HardwareMap required
      */
-    public Follower(HardwareMap hardwareMap) {
+    public Follower(HardwareMap hardwareMap, Class<?> FConstants, Class<?> LConstants) {
         this.hardwareMap = hardwareMap;
+        setupConstants(FConstants, LConstants);
         initialize();
     }
 
@@ -185,9 +187,33 @@ public class Follower {
      * @param hardwareMap HardwareMap required
      * @param localizer the localizer you wish to use
      */
-    public Follower(HardwareMap hardwareMap, Localizer localizer) {
+    public Follower(HardwareMap hardwareMap, Localizer localizer, Class<?> FConstants, Class<?> LConstants) {
         this.hardwareMap = hardwareMap;
+        setupConstants(FConstants, LConstants);
         initialize(localizer);
+    }
+
+    /**
+     * Setup constants for the Follower.
+     * @param FConstants the constants for the Follower
+     * @param LConstants the constants for the Localizer
+     */
+    public void setupConstants(Class<?> FConstants, Class<?> LConstants) {
+        Constants.setConstants(FConstants, LConstants);
+        BEZIER_CURVE_SEARCH_LIMIT = FollowerConstants.BEZIER_CURVE_SEARCH_LIMIT;
+        AVERAGED_VELOCITY_SAMPLE_NUMBER = FollowerConstants.AVERAGED_VELOCITY_SAMPLE_NUMBER;
+        holdPointTranslationalScaling = FollowerConstants.holdPointTranslationalScaling;
+        holdPointHeadingScaling = FollowerConstants.holdPointHeadingScaling;
+        centripetalScaling = FollowerConstants.centripetalScaling;
+        secondaryTranslationalPIDF = new PIDFController(FollowerConstants.secondaryTranslationalPIDFCoefficients);
+        secondaryTranslationalIntegral = new PIDFController(FollowerConstants.secondaryTranslationalIntegral);
+        translationalPIDF = new PIDFController(FollowerConstants.translationalPIDFCoefficients);
+        translationalIntegral = new PIDFController(FollowerConstants.translationalIntegral);
+        secondaryHeadingPIDF = new PIDFController(FollowerConstants.secondaryHeadingPIDFCoefficients);
+        headingPIDF = new PIDFController(FollowerConstants.headingPIDFCoefficients);
+        secondaryDrivePIDF = new FilteredPIDFController(FollowerConstants.secondaryDrivePIDFCoefficients);
+        drivePIDF = new FilteredPIDFController(FollowerConstants.drivePIDFCoefficients);
+        driveKalmanFilter = new KalmanFilter(FollowerConstants.driveKalmanFilterParameters);
     }
 
     /**
