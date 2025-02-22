@@ -236,7 +236,7 @@ public class PinpointLocalizer extends Localizer {
      * This resets the IMU. Does not change heading estimation.
      */
     @Override
-    public void resetIMU() throws InterruptedException {
+    public void resetIMU() {
         odo.recalibrateIMU();
     }
 
@@ -253,16 +253,14 @@ public class PinpointLocalizer extends Localizer {
         }
     }
 
-    private Pose getPoseEstimate(Pose2D pinpointEstimate, Pose currentPose, long deltaTime) {
-        if (Double.isNaN(pinpointEstimate.getX(DistanceUnit.INCH)) || Double.isNaN(pinpointEstimate.getY(DistanceUnit.INCH)) || Double.isNaN(pinpointEstimate.getHeading(AngleUnit.RADIANS))) {
+    private Pose getPoseEstimate(Pose pinpointEstimate, Pose currentPose, long deltaTime) {
+        if (Double.isNaN(pinpointEstimate.getX()) || Double.isNaN(pinpointEstimate.getY()) || Double.isNaN(pinpointEstimate.getHeading())) {
             pinpointCooked = true;
             return MathFunctions.addPoses(currentPose, new Pose(currentVelocity.getX() * deltaTime / Math.pow(10, 9), currentVelocity.getY() * deltaTime / Math.pow(10, 9), currentVelocity.getHeading() * deltaTime / Math.pow(10, 9)));
         }
 
-        Pose estimate = new Pose(pinpointEstimate.getX(DistanceUnit.INCH), pinpointEstimate.getY(DistanceUnit.INCH), pinpointEstimate.getHeading(AngleUnit.RADIANS));
-
         pinpointCooked = false;
-        return estimate;
+        return pinpointEstimate;
     }
 
     /**

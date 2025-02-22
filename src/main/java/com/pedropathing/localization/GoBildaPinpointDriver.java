@@ -497,29 +497,16 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     public float getYOffset(){return readFloat(Register.Y_POD_OFFSET);}
 
     /**
-     * @return a Pose2D containing the estimated position of the robot
+     * @return a Pose containing the estimated position of the robot
      */
-    public Pose2D getPosition(){
-        return new Pose2D(DistanceUnit.MM,
-                xPosition,
-                yPosition,
-                AngleUnit.RADIANS,
-                hOrientation);
+    public Pose getPosition(){
+        return new Pose(DistanceUnit.INCH.fromMm(xPosition), DistanceUnit.INCH.fromMm(yPosition), hOrientation);
     }
-
-
 
     /**
-     * @return a Pose2D containing the estimated velocity of the robot, velocity is unit per second
+     * @return a Pose containing the estimated velocity of the robot, velocity is unit per second
      */
-    public Pose2D getVelocity(){
-        return new Pose2D(DistanceUnit.MM,
-                xVelocity,
-                yVelocity,
-                AngleUnit.RADIANS,
-                hVelocity);
+    public Pose getVelocity(){
+        return new Pose(DistanceUnit.INCH.fromMm(xVelocity), DistanceUnit.INCH.fromMm(yVelocity), hVelocity);
     }
-
-
-
 }
