@@ -163,7 +163,7 @@ public class PinpointLocalizer extends Localizer {
      */
     @Override
     public void setPose(Pose setPose) {
-        odo.setPosition(new Pose2D(DistanceUnit.INCH, setPose.getX(), setPose.getY(), AngleUnit.RADIANS, setPose.getHeading()));
+        odo.setPosition(new Pose(setPose.getX(), setPose.getY(), setPose.getHeading()));
         pinpointPose = setPose;
         previousHeading = setPose.getHeading();
     }
