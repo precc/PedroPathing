@@ -345,4 +345,9 @@ public class FollowerConstants {
      *  Will only read voltage if useVoltageCompensation is true.
      *  Default Value: 0.5 */
     public static double cacheInvalidateSeconds = 0.5;
+
+    /** Threshold that the turn and turnTo methods will be considered to be finished
+     *  In Radians
+     *  Default Value: 0.01 */
+    public static double turnHeadingErrorThreshold = 0.01;
 }
