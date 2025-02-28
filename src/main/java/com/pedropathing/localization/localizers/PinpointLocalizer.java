@@ -254,13 +254,34 @@ public class PinpointLocalizer extends Localizer {
     }
 
     private Pose getPoseEstimate(Pose pinpointEstimate, Pose currentPose, long deltaTime) {
-        if (Double.isNaN(pinpointEstimate.getX()) || Double.isNaN(pinpointEstimate.getY()) || Double.isNaN(pinpointEstimate.getHeading())) {
-            pinpointCooked = true;
-            return MathFunctions.addPoses(currentPose, new Pose(currentVelocity.getX() * deltaTime / Math.pow(10, 9), currentVelocity.getY() * deltaTime / Math.pow(10, 9), currentVelocity.getHeading() * deltaTime / Math.pow(10, 9)));
-        }
+        double x;
+        double y;
+        double heading;
 
         pinpointCooked = false;
-        return pinpointEstimate;
+
+        if (!Double.isNaN(pinpointEstimate.getX())) {
+            x = pinpointEstimate.getX();
+        } else {
+            x = currentPose.getX() + currentVelocity.getX() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        if (!Double.isNaN(pinpointEstimate.getY())) {
+            y = pinpointEstimate.getY();
+        } else {
+            y = currentPose.getY() + currentVelocity.getY() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        if (!Double.isNaN(pinpointEstimate.getHeading())) {
+            heading = pinpointEstimate.getHeading();
+        } else {
+            heading = currentPose.getHeading() + currentVelocity.getHeading() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        return new Pose(x, y, heading);
     }
 
     /**
