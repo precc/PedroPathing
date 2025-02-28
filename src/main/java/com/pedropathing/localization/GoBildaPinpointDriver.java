@@ -29,7 +29,9 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import com.pedropathing.pathgen.MathFunctions;
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
+import com.qualcomm.hardware.lynx.LynxNackException;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
@@ -39,7 +41,6 @@ import com.qualcomm.robotcore.util.TypeConversion;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -261,17 +262,26 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      */
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     public void update(){
-        byte[] bArr   = deviceClient.read(Register.BULK_READ.bVal, 40);
-        deviceStatus  = byteArrayToInt(Arrays.copyOfRange  (bArr, 0, 4),  ByteOrder.LITTLE_ENDIAN);
-        loopTime      = byteArrayToInt(Arrays.copyOfRange  (bArr, 4, 8),  ByteOrder.LITTLE_ENDIAN);
-        xEncoderValue = byteArrayToInt(Arrays.copyOfRange  (bArr, 8, 12), ByteOrder.LITTLE_ENDIAN);
-        yEncoderValue = byteArrayToInt(Arrays.copyOfRange  (bArr, 12,16), ByteOrder.LITTLE_ENDIAN);
-        xPosition     = byteArrayToFloat(Arrays.copyOfRange(bArr, 16,20), ByteOrder.LITTLE_ENDIAN);
-        yPosition     = byteArrayToFloat(Arrays.copyOfRange(bArr, 20,24), ByteOrder.LITTLE_ENDIAN);
-        hOrientation  = byteArrayToFloat(Arrays.copyOfRange(bArr, 24,28), ByteOrder.LITTLE_ENDIAN);
-        xVelocity     = byteArrayToFloat(Arrays.copyOfRange(bArr, 28,32), ByteOrder.LITTLE_ENDIAN);
-        yVelocity     = byteArrayToFloat(Arrays.copyOfRange(bArr, 32,36), ByteOrder.LITTLE_ENDIAN);
-        hVelocity     = byteArrayToFloat(Arrays.copyOfRange(bArr, 36,40), ByteOrder.LITTLE_ENDIAN);
+        try {
+            byte[] bArr = deviceClient.read(Register.BULK_READ.bVal, 40);
+            deviceStatus = byteArrayToInt(Arrays.copyOfRange(bArr, 0, 4), ByteOrder.LITTLE_ENDIAN);
+            loopTime = byteArrayToInt(Arrays.copyOfRange(bArr, 4, 8), ByteOrder.LITTLE_ENDIAN);
+            xEncoderValue = byteArrayToInt(Arrays.copyOfRange(bArr, 8, 12), ByteOrder.LITTLE_ENDIAN);
+            yEncoderValue = byteArrayToInt(Arrays.copyOfRange(bArr, 12, 16), ByteOrder.LITTLE_ENDIAN);
+            xPosition = byteArrayToFloat(Arrays.copyOfRange(bArr, 16, 20), ByteOrder.LITTLE_ENDIAN);
+            yPosition = byteArrayToFloat(Arrays.copyOfRange(bArr, 20, 24), ByteOrder.LITTLE_ENDIAN);
+            hOrientation = byteArrayToFloat(Arrays.copyOfRange(bArr, 24, 28), ByteOrder.LITTLE_ENDIAN);
+            xVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 28, 32), ByteOrder.LITTLE_ENDIAN);
+            yVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 32, 36), ByteOrder.LITTLE_ENDIAN);
+            hVelocity = byteArrayToFloat(Arrays.copyOfRange(bArr, 36, 40), ByteOrder.LITTLE_ENDIAN);
+        }
+        catch (Exception ex) {
+            if (ex instanceof LynxNackException)
+            {
+                LynxNackException lynxEx = (LynxNackException)ex;
+                lynxEx.getMessage(); // do smth this idk
+            }
+        }
     }
 
     /**
@@ -281,8 +291,17 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * @param data GoBildaPinpointDriver.readData.ONLY_UPDATE_HEADING
      */
     public void update(readData data) {
-        if (data == readData.ONLY_UPDATE_HEADING) {
-            hOrientation = byteArrayToFloat(deviceClient.read(Register.H_ORIENTATION.bVal, 4), ByteOrder.LITTLE_ENDIAN);
+        try {
+            if (data == readData.ONLY_UPDATE_HEADING) {
+                hOrientation = byteArrayToFloat(deviceClient.read(Register.H_ORIENTATION.bVal, 4), ByteOrder.LITTLE_ENDIAN);
+            }
+        }
+        catch (Exception ex) {
+            if (ex instanceof LynxNackException)
+            {
+                LynxNackException lynxEx = (LynxNackException)ex;
+                lynxEx.getMessage(); // do smth this idk
+            }
         }
     }
 
@@ -375,7 +394,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * in field coordinates. <br><br>
      * This overrides the current position. <br><br>
      * <strong>Using this feature to track your robot's position in field coordinates:</strong> <br>
-     * When you start your code, send a Pose2D that describes the starting position on the field of your robot. <br>
+     * When you start your code, send a Pose that describes the starting position on the field of your robot. <br>
      * Say you're on the red alliance, your robot is against the wall and closer to the audience side,
      * and the front of your robot is pointing towards the center of the field.
      * You can send a setPosition with something like -600mm x, -1200mm Y, and 90 degrees. The pinpoint would then always
@@ -389,12 +408,12 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * to determine your location. Then when you pull a new position from your secondary sensor,
      * send a setPosition command with the new position. The Pinpoint will then track your movement
      * relative to that new, more accurate position.
-     * @param pos a Pose2D describing the robot's new position.
+     * @param pos a Pose describing the robot's new position.
      */
-    public Pose2D setPosition(Pose2D pos){
-        writeByteArray(Register.X_POSITION,(floatToByteArray((float) pos.getX(DistanceUnit.MM), ByteOrder.LITTLE_ENDIAN)));
-        writeByteArray(Register.Y_POSITION,(floatToByteArray((float) pos.getY(DistanceUnit.MM),ByteOrder.LITTLE_ENDIAN)));
-        writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(AngleUnit.RADIANS),ByteOrder.LITTLE_ENDIAN)));
+    public Pose setPosition(Pose pos){
+        writeByteArray(Register.X_POSITION,(floatToByteArray((float) MathFunctions.inToMM(pos.getX()), ByteOrder.LITTLE_ENDIAN)));
+        writeByteArray(Register.Y_POSITION,(floatToByteArray((float) MathFunctions.inToMM(pos.getY()),ByteOrder.LITTLE_ENDIAN)));
+        writeByteArray(Register.H_ORIENTATION,(floatToByteArray((float) pos.getHeading(),ByteOrder.LITTLE_ENDIAN)));
         return pos;
     }
 
