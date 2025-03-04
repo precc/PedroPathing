@@ -1372,4 +1372,8 @@ public class Follower {
     public boolean atPose(Pose pose, double xTolerance, double yTolerance) {
         return Math.abs(pose.getX() - getPose().getX()) < xTolerance && Math.abs(pose.getY() - getPose().getY()) < yTolerance;
     }
+
+    public double getHeadingError() {
+        return headingError;
+    }
 }
