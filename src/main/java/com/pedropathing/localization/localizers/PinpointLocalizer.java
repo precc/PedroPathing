@@ -163,7 +163,7 @@ public class PinpointLocalizer extends Localizer {
      */
     @Override
     public void setPose(Pose setPose) {
-        odo.setPosition(new Pose2D(DistanceUnit.INCH, setPose.getX(), setPose.getY(), AngleUnit.RADIANS, setPose.getHeading()));
+        odo.setPosition(new Pose(setPose.getX(), setPose.getY(), setPose.getHeading()));
         pinpointPose = setPose;
         previousHeading = setPose.getHeading();
     }
@@ -236,7 +236,7 @@ public class PinpointLocalizer extends Localizer {
      * This resets the IMU. Does not change heading estimation.
      */
     @Override
-    public void resetIMU() throws InterruptedException {
+    public void resetIMU() {
         odo.recalibrateIMU();
     }
 
@@ -253,16 +253,35 @@ public class PinpointLocalizer extends Localizer {
         }
     }
 
-    private Pose getPoseEstimate(Pose2D pinpointEstimate, Pose currentPose, long deltaTime) {
-        if (Double.isNaN(pinpointEstimate.getX(DistanceUnit.INCH)) || Double.isNaN(pinpointEstimate.getY(DistanceUnit.INCH)) || Double.isNaN(pinpointEstimate.getHeading(AngleUnit.RADIANS))) {
-            pinpointCooked = true;
-            return MathFunctions.addPoses(currentPose, new Pose(currentVelocity.getX() * deltaTime / Math.pow(10, 9), currentVelocity.getY() * deltaTime / Math.pow(10, 9), currentVelocity.getHeading() * deltaTime / Math.pow(10, 9)));
-        }
-
-        Pose estimate = new Pose(pinpointEstimate.getX(DistanceUnit.INCH), pinpointEstimate.getY(DistanceUnit.INCH), pinpointEstimate.getHeading(AngleUnit.RADIANS));
+    private Pose getPoseEstimate(Pose pinpointEstimate, Pose currentPose, long deltaTime) {
+        double x;
+        double y;
+        double heading;
 
         pinpointCooked = false;
-        return estimate;
+
+        if (!Double.isNaN(pinpointEstimate.getX())) {
+            x = pinpointEstimate.getX();
+        } else {
+            x = currentPose.getX() + currentVelocity.getX() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        if (!Double.isNaN(pinpointEstimate.getY())) {
+            y = pinpointEstimate.getY();
+        } else {
+            y = currentPose.getY() + currentVelocity.getY() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        if (!Double.isNaN(pinpointEstimate.getHeading())) {
+            heading = pinpointEstimate.getHeading();
+        } else {
+            heading = currentPose.getHeading() + currentVelocity.getHeading() * deltaTime / Math.pow(10, 9);
+            pinpointCooked = true;
+        }
+
+        return new Pose(x, y, heading);
     }
 
     /**
