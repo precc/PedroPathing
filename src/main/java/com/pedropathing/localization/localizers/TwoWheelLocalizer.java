@@ -1,6 +1,8 @@
 package com.pedropathing.localization.localizers;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.kauailabs.navx.ftc.AHRS;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -47,6 +49,7 @@ import com.pedropathing.util.NanoTimer;
 public class TwoWheelLocalizer extends Localizer {
     private HardwareMap hardwareMap;
     private IMU imu;
+    private AHRS navx_device;
     private Pose startPose;
     private Pose displacementPose;
     private Pose currentVelocity;
@@ -62,6 +65,7 @@ public class TwoWheelLocalizer extends Localizer {
     private double totalHeading;
     public static double FORWARD_TICKS_TO_INCHES;
     public static double STRAFE_TICKS_TO_INCHES;
+    private final byte NAVX_DEVICE_UPDATE_RATE_HZ = 50;
 
     /**
      * This creates a new TwoWheelLocalizer from a HardwareMap, with a starting Pose at (0,0)
@@ -90,6 +94,10 @@ public class TwoWheelLocalizer extends Localizer {
         hardwareMap = map;
 
         imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
+        // TODO: Make a variable for the navx name
+        navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, "navx"),
+                AHRS.DeviceDataType.kProcessedData,
+                NAVX_DEVICE_UPDATE_RATE_HZ);
         imu.initialize(new IMU.Parameters(IMU_Orientation));
 
         forwardEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, forwardEncoder_HardwareMapName));
@@ -105,6 +113,8 @@ public class TwoWheelLocalizer extends Localizer {
         currentVelocity = new Pose();
 
         previousIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        // the getYaw() method returns the value in degrees, so we must convert it to radians first
+        previousIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = 0;
     }
 
@@ -220,7 +230,8 @@ public class TwoWheelLocalizer extends Localizer {
         forwardEncoder.update();
         strafeEncoder.update();
 
-        double currentIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+//        double currentIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        double currentIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = MathFunctions.getTurnDirection(previousIMUOrientation, currentIMUOrientation) * MathFunctions.getSmallestAngleDifference(currentIMUOrientation, previousIMUOrientation);
         previousIMUOrientation = currentIMUOrientation;
     }
@@ -294,7 +305,8 @@ public class TwoWheelLocalizer extends Localizer {
      * This resets the IMU.
      */
     public void resetIMU() {
-        imu.resetYaw();
+//        imu.resetYaw();
+        navx_device.zeroYaw();
     }
 
     /**
@@ -303,9 +315,12 @@ public class TwoWheelLocalizer extends Localizer {
      * @return returns the IMU
      */
     @Override
-    public IMU getIMU() {
-        return imu;
-    }
+//    public IMU getIMU() {
+//        return imu;
+//    }
+//    public AHRS getIMU() {
+//        return navx_device;
+//    }
 
     /**
      * This returns whether if any component of robot's position is NaN.
