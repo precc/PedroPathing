@@ -33,6 +33,12 @@ public class TwoWheelConstants {
      * Default Value: "imu" */
     public static String IMU_HardwareMapName = "imu";
 
+    /** The Hardware Map Name of the NAVX IMU
+     * Default Value: "navx" */
+    public static String NAVX_HardwareMapName = "navx";
+
+    public static final byte NAVX_DEVICE_UPDATE_RATE_HZ = 50;
+
     /** The Hardware Map Name of the Forward Encoder (name of the motor port it is plugged into)
      * Default Value: "leftFront" */
     public static String forwardEncoder_HardwareMapName = "leftFront";

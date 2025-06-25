@@ -1,5 +1,7 @@
 package com.pedropathing.localization;
 
+import com.kauailabs.navx.ftc.AHRS;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import com.pedropathing.pathgen.Vector;
@@ -100,6 +102,15 @@ public abstract class Localizer {
      * @return returns the IMU if it exists
      */
     public IMU getIMU() {
+        return null;
+    }
+
+    /**
+     * This is overridden to return the NAVX, if there is one.
+     *
+     * @return returns the NAVX if it exists
+     */
+    public AHRS getNAVX() {
         return null;
     }
 
