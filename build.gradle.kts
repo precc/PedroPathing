@@ -44,9 +44,15 @@ val defaultMinSdkVersion by extra(29)
 val defaultMinSdkVersion1 by extra(23)
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	google()
 	maven("https://maven.brott.dev/")
+
+	maven {
+		name = "publishing"
+		url = uri("./maven.pedropathing.com")
+	}
 }
 
 android {
@@ -85,7 +91,12 @@ dependencies {
 	dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.20")
 	dokkaGfmPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.20")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
-	implementation(files("C:\\Users\\qianj\\navx-micro\\android\\libs\\navx_ftc-release.aar"))
+
+	//implementation(files("libs/navx_ftc-release.aar"))
+	implementation("com.navxlib:navxlib:1.0.0")
+//	implementation(":libs:navx_ftc-release@aar")
+//	implementation(files("C:\\Users\\qianj\\navx-micro\\android\\libs\\navx_ftc-release.aar"))
+
 }
 
 // CONFIGURE PUBLICATION
@@ -94,22 +105,11 @@ publishing {
 		register<MavenPublication>("release") {
 			groupId = "com.pedropathing"
 			artifactId = "pedro"
-			version = "1.0.9"
+			version = "1.0.9-navx"
 
 			afterEvaluate {
 				from(components["release"])
 			}
-		}
-	}
-
-	repositories {
-		maven {
-			name = "publishing"
-			url = uri("./maven.pedropathing.com")
-		}
-
-		flatDir {
-			dirs("C:\\Users\\qianj\\navx-micro\\android\\libs")
 		}
 	}
 }
