@@ -52,7 +52,6 @@ import com.pedropathing.util.NanoTimer;
 public class TwoWheelLocalizer extends Localizer {
     private HardwareMap hardwareMap;
     private IMU imu;
-//    private AHRS navx_device;
     private Pose startPose;
     private Pose displacementPose;
     private Pose currentVelocity;
@@ -97,11 +96,10 @@ public class TwoWheelLocalizer extends Localizer {
 
         hardwareMap = map;
 
-//        imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
+        // imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
         imu = new NavxImu(hardwareMap, null);
 
-
-        //imu.initialize(new IMU.Parameters(IMU_Orientation));
+        // imu.initialize(new IMU.Parameters(IMU_Orientation));
 
         forwardEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, forwardEncoder_HardwareMapName));
         strafeEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, strafeEncoder_HardwareMapName));
@@ -116,9 +114,6 @@ public class TwoWheelLocalizer extends Localizer {
         currentVelocity = new Pose();
 
         previousIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-        // the getYaw() method returns the value in degrees, so we must convert it to radians first\
-//         TODO: Test with reversed angles
-//        previousIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = 0;
     }
 
@@ -235,7 +230,6 @@ public class TwoWheelLocalizer extends Localizer {
         strafeEncoder.update();
 
         double currentIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-//        double currentIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = MathFunctions.getTurnDirection(previousIMUOrientation, currentIMUOrientation) * MathFunctions.getSmallestAngleDifference(currentIMUOrientation, previousIMUOrientation);
         previousIMUOrientation = currentIMUOrientation;
     }
@@ -311,22 +305,11 @@ public class TwoWheelLocalizer extends Localizer {
     // TODO: Verify that the zeroYaw() method works as intended.
     public void resetIMU() {
         imu.resetYaw();
-//        navx_device.zeroYaw();
     }
-
-//    /**
-//     * This is returns the IMU.
-//     *
-//     * @return returns the IMU
-//     */
-//    @Override
-//    public AHRS getNAVX() {
-//        return navx_device;
-//    }
 
     // putting this here since the abstract superclass requires the getIMU() method to be called.
     public IMU getIMU() {
-        return null;
+        return imu;
     }
 
     /**
