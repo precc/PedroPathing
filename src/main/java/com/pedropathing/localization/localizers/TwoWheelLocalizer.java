@@ -2,7 +2,6 @@ package com.pedropathing.localization.localizers;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.kauailabs.navx.ftc.AHRS;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -52,7 +51,7 @@ import com.pedropathing.util.NanoTimer;
 public class TwoWheelLocalizer extends Localizer {
     private HardwareMap hardwareMap;
     private IMU imu;
-//    private AHRS navx_device;
+    private AHRS navx_device;
     private Pose startPose;
     private Pose displacementPose;
     private Pose currentVelocity;
@@ -98,10 +97,14 @@ public class TwoWheelLocalizer extends Localizer {
         hardwareMap = map;
 
 //        imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
-        imu = new NavxImu(hardwareMap, null);
+        // create the NAVX imu device
+        navx_device = AHRS.getInstance(hardwareMap.get(NavxMicroNavigationSensor.class, NAVX_HardwareMapName),
+                AHRS.DeviceDataType.kProcessedData,
+                NAVX_DEVICE_UPDATE_RATE_HZ);
+        // when the NAVX is created make sure its heading is set
+        navx_device.zeroYaw();
 
-
-        //imu.initialize(new IMU.Parameters(IMU_Orientation));
+//        imu.initialize(new IMU.Parameters(IMU_Orientation));
 
         forwardEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, forwardEncoder_HardwareMapName));
         strafeEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, strafeEncoder_HardwareMapName));
@@ -115,10 +118,10 @@ public class TwoWheelLocalizer extends Localizer {
         displacementPose = new Pose();
         currentVelocity = new Pose();
 
-        previousIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+//        previousIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
         // the getYaw() method returns the value in degrees, so we must convert it to radians first\
-//         TODO: Test with reversed angles
-//        previousIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
+        // TODO: Test with reversed angles
+        previousIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = 0;
     }
 
@@ -234,8 +237,8 @@ public class TwoWheelLocalizer extends Localizer {
         forwardEncoder.update();
         strafeEncoder.update();
 
-        double currentIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-//        double currentIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
+//        double currentIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        double currentIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = MathFunctions.getTurnDirection(previousIMUOrientation, currentIMUOrientation) * MathFunctions.getSmallestAngleDifference(currentIMUOrientation, previousIMUOrientation);
         previousIMUOrientation = currentIMUOrientation;
     }
@@ -310,23 +313,40 @@ public class TwoWheelLocalizer extends Localizer {
      */
     // TODO: Verify that the zeroYaw() method works as intended.
     public void resetIMU() {
-        imu.resetYaw();
-//        navx_device.zeroYaw();
+//        imu.resetYaw();
+        navx_device.zeroYaw();
     }
 
-//    /**
-//     * This is returns the IMU.
-//     *
-//     * @return returns the IMU
-//     */
-//    @Override
-//    public AHRS getNAVX() {
-//        return navx_device;
-//    }
+    /**
+     * This is returns the IMU.
+     *
+     * @return returns the IMU
+     */
+    @Override
+    public AHRS getNAVX() {
+        return navx_device;
+    }
 
     // putting this here since the abstract superclass requires the getIMU() method to be called.
     public IMU getIMU() {
         return null;
+    }
+
+    // Run the calibrate() method in the init loop of every program
+    public void calibrate() {
+        if (!calibration_complete) {
+            /* navX-Micro Calibration completes automatically ~15 seconds after it is
+            powered on, as long as the device is still.  To handle the case where the
+            navX-Micro has not been able to calibrate successfully, hold off using
+            the navX-Micro Yaw value until calibration is complete.
+             */
+            calibration_complete = !navx_device.isCalibrating();
+            if (calibration_complete)  {
+                navx_device.zeroYaw();
+            } else {
+                Log.d("navX-Micro", "Startup Calibration in Progress");
+            }
+        }
     }
 
     /**

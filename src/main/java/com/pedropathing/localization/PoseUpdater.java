@@ -29,9 +29,9 @@ import com.pedropathing.pathgen.Vector;
 public class PoseUpdater {
     private HardwareMap hardwareMap;
 
-    private IMU imu;
+//    private IMU imu;
 
-//    private AHRS navx_device;
+    private AHRS navx_device;
 
     private Localizer localizer;
 
@@ -75,8 +75,8 @@ public class PoseUpdater {
             }
         }
 
-        imu = localizer.getIMU();
-//        navx_device = localizer.getNAVX();
+//        imu = localizer.getIMU();
+        navx_device = localizer.getNAVX();
     }
 
     /**
@@ -107,8 +107,8 @@ public class PoseUpdater {
             }
         }
 
-        imu = localizer.getIMU();
-//        navx_device = localizer.getNAVX();
+//        imu = localizer.getIMU();
+        navx_device = localizer.getNAVX();
     }
 
     /**
@@ -369,7 +369,7 @@ public class PoseUpdater {
      * This resets the heading of the robot to the IMU's heading, using Road Runner's pose reset.
      */
     public void resetHeadingToIMU() {
-        if (imu != null) {
+        if (navx_device != null) {
             localizer.setPose(new Pose(getPose().getX(), getPose().getY(), getNormalizedIMUHeading() + startingPose.getHeading()));
         }
     }
@@ -380,7 +380,7 @@ public class PoseUpdater {
      * method.
      */
     public void resetHeadingToIMUWithOffsets() {
-        if (imu != null) {
+        if (navx_device != null) {
             setCurrentPoseWithOffset(new Pose(getPose().getX(), getPose().getY(), getNormalizedIMUHeading() + startingPose.getHeading()));
         }
     }
@@ -391,8 +391,8 @@ public class PoseUpdater {
      * @return returns the normalized IMU heading.
      */
     public double getNormalizedIMUHeading() {
-        if (imu != null) {
-            return MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        if (navx_device != null) {
+            return MathFunctions.normalizeAngle(-Math.toRadians(navx_device.getYaw()));
         }
         return 0;
     }
