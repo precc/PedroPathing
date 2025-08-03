@@ -119,8 +119,7 @@ public class TwoWheelLocalizer extends Localizer {
         currentVelocity = new Pose();
 
 //        previousIMUOrientation = MathFunctions.normalizeAngle(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-        // the getYaw() method returns the value in degrees, so we must convert it to radians first\
-        // TODO: Test with reversed angles
+        // the getYaw() method returns the value in degrees, so we must convert it to radians first
         previousIMUOrientation = MathFunctions.normalizeAngle(Math.toRadians(navx_device.getYaw()));
         deltaRadians = 0;
     }
