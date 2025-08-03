@@ -85,7 +85,6 @@ dependencies {
 	dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.20")
 	dokkaGfmPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.20")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
-	implementation(files("C:\\Users\\qianj\\navx-micro\\android\\libs\\navx_ftc-release.aar"))
 }
 
 // CONFIGURE PUBLICATION
@@ -106,10 +105,6 @@ publishing {
 		maven {
 			name = "publishing"
 			url = uri("./maven.pedropathing.com")
-		}
-
-		flatDir {
-			dirs("C:\\Users\\qianj\\navx-micro\\android\\libs")
 		}
 	}
 }
