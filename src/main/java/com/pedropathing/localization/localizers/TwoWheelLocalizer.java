@@ -70,7 +70,11 @@ public class TwoWheelLocalizer extends Localizer {
      * @param map the HardwareMap
      */
     public TwoWheelLocalizer(HardwareMap map) {
-        this(map, new Pose());
+        this(map, new Pose(), null);
+    }
+
+    public TwoWheelLocalizer(HardwareMap map, IMU customIMU) {
+        this(map, new Pose(), customIMU);
     }
 
     /**
@@ -80,7 +84,7 @@ public class TwoWheelLocalizer extends Localizer {
      * @param map the HardwareMap
      * @param setStartPose the Pose to start from
      */
-    public TwoWheelLocalizer(HardwareMap map, Pose setStartPose) {
+    public TwoWheelLocalizer(HardwareMap map, Pose setStartPose, IMU customIMU) {
         FORWARD_TICKS_TO_INCHES = forwardTicksToInches;
         STRAFE_TICKS_TO_INCHES = strafeTicksToInches;
 
@@ -89,8 +93,12 @@ public class TwoWheelLocalizer extends Localizer {
 
         hardwareMap = map;
 
-        imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
-        imu.initialize(new IMU.Parameters(IMU_Orientation));
+        if (customIMU != null) {
+            imu = customIMU;
+        } else {
+            imu = hardwareMap.get(IMU.class, IMU_HardwareMapName);
+            imu.initialize(new IMU.Parameters(IMU_Orientation));
+        }
 
         forwardEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, forwardEncoder_HardwareMapName));
         strafeEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, strafeEncoder_HardwareMapName));
