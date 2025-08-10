@@ -983,7 +983,12 @@ public class Follower {
      */
     public Vector getHeadingVector() {
         if (!useHeading) return new Vector();
-        headingError = MathFunctions.getTurnDirection(poseUpdater.getPose().getHeading(), currentPath.getClosestPointHeadingGoal()) * MathFunctions.getSmallestAngleDifference(poseUpdater.getPose().getHeading(), currentPath.getClosestPointHeadingGoal());
+        headingError = MathFunctions.getTurnDirection(
+            poseUpdater.getPose().getHeading(),
+            currentPath.getClosestPointHeadingGoal()) *
+                MathFunctions.getSmallestAngleDifference(
+                    poseUpdater.getPose().getHeading(),
+                    currentPath.getClosestPointHeadingGoal());
         if (Math.abs(headingError) < headingPIDFSwitch && useSecondaryHeadingPID) {
 //            if(logDebug) {
 //                Log.d("Follower_logger", "using secondary heading PIDF controller, error: "
